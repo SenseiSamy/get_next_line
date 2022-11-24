@@ -6,15 +6,13 @@
 /*   By: snaji <snaji@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 15:35:10 by snaji             #+#    #+#             */
-/*   Updated: 2022/11/23 21:30:51 by snaji            ###   ########.fr       */
+/*   Updated: 2022/11/24 16:26:37 by snaji            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef GET_NEXT_LINE_H
 # include <stdlib.h>
 # include <unistd.h>
-// DEBUG
-# include <stdio.h>
 # define GET_NEXT_LINE_H
 # ifndef BUFFER_SIZE
 #  define BUFFER_SIZE 256
