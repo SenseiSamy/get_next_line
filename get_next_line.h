@@ -6,7 +6,7 @@
 /*   By: snaji <snaji@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 15:35:10 by snaji             #+#    #+#             */
-/*   Updated: 2022/11/24 16:26:37 by snaji            ###   ########.fr       */
+/*   Updated: 2022/11/25 19:52:46 by snaji            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,16 +28,17 @@ typedef struct s_fd
 {
 	int			fd;
 	char		buf[BUFFER_SIZE + 1];
+	size_t		eol_pos;
 	struct s_fd	*next;
 }	t_fd;
 
 char	*get_next_line(int fd);
-t_line	*get_line(int fd, char *buf, int *buf_count);
-t_line	*get_one(int fd, char *buf, ssize_t *ret, int *buf_count);
-char	*get_fd_buf(int fd, t_fd **list_fd);
+t_line	*get_line(t_fd *fd, int *buf_count);
+t_line	*get_one(t_fd *fd, ssize_t *ret, int *buf_count);
+t_fd	*get_fd(int fd, t_fd **list_fd);
 char	*build_line(t_line **line, int buf_count);
-void	remove_line_from_buf(char *buffer);
+void	remove_line_from_buf(t_fd *fd);
 void	remove_fd(int fd, t_fd **liste_fd);
 void	free_line(t_line **line);
-int		is_end_line(char *s);
+size_t	eol_pos(char *s);
 #endif

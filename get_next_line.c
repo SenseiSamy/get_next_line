@@ -6,25 +6,29 @@
 /*   By: snaji <snaji@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 15:54:03 by snaji             #+#    #+#             */
-/*   Updated: 2022/11/23 21:31:13 by snaji            ###   ########.fr       */
+/*   Updated: 2022/11/25 21:30:02 by snaji            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
+//DEBUG
+#include <stdio.h>
+#include <time.h>
+
 char	*get_next_line(int fd)
 {
 	static t_fd	*list_fd;
 	t_line		*line;
-	char		*current_buf;
+	t_fd		*current_fd;
 	int			buf_count;
 
 	if (fd < 0 || BUFFER_SIZE < 0)
 		return (NULL);
-	current_buf = get_fd_buf(fd, &list_fd);
-	if (!current_buf)
+	current_fd = get_fd(fd, &list_fd);
+	if (!current_fd)
 		return (NULL);
-	line = get_line(fd, current_buf, &buf_count);
+	line = get_line(current_fd, &buf_count);
 	if (!line)
 		return (free_line(&line), remove_fd(fd, &list_fd), NULL);
 	return (build_line(&line, buf_count));
@@ -56,7 +60,7 @@ char	*build_line(t_line **line, int buf_count)
 	return (result);
 }
 
-t_line	*get_line(int fd, char *buf, int *buf_count)
+t_line	*get_line(t_fd *fd, int *buf_count)
 {
 	t_line	*line;
 	t_line	*curr;
@@ -65,49 +69,50 @@ t_line	*get_line(int fd, char *buf, int *buf_count)
 
 	*buf_count = 0;
 	ret = -1;
-	line = get_one(fd, buf, &ret, buf_count);
+	line = get_one(fd, &ret, buf_count);
 	curr = line;
 	if (!curr)
 		return (NULL);
-	while (ret && !is_end_line(curr->buf))
+	while (ret && !eol_pos(curr->buf))
 	{
-		curr->next = get_one(fd, buf, &ret, buf_count);
+		curr->next = get_one(fd, &ret, buf_count);
 		if (!curr->next)
 			return (free_line(&line), NULL);
 		curr = curr->next;
 	}
 	i = 0;
-	while (++i - 1 < BUFFER_SIZE + 1)
-		buf[i - 1] = curr->buf[i - 1];
-	remove_line_from_buf(buf);
+	while (curr->buf[++i - 1])
+		fd->buf[i - 1] = curr->buf[i - 1];
+	fd->eol_pos = 0;
+	//remove_line_from_buf(fd);
 	if (line->buf[0])
 		return (line);
 	return (free_line(&line), NULL);
 }
 
-t_line	*get_one(int fd, char *buf, ssize_t *ret, int *buf_count)
+t_line	*get_one(t_fd *fd, ssize_t *ret, int *buf_count)
 {
 	t_line	*line_el;
-	size_t	i;
 
-	*ret = -1;
+	*ret = 0;
 	line_el = malloc(sizeof (*line_el));
 	if (!line_el)
 		return (NULL);
-	i = 0;
-	while (i < BUFFER_SIZE + 1)
-		line_el->buf[i++] = '\0';
 	line_el->next = NULL;
-	if (buf && *buf)
+	if (fd->buf && eol_pos(fd->buf))
 	{
-		while (buf[++*ret])
-			line_el->buf[*ret] = buf[*ret];
+		remove_line_from_buf(fd);
+		while (fd->buf[*ret + fd->eol_pos])
+		{
+			line_el->buf[*ret] = fd->buf[*ret + fd->eol_pos];
+			++*ret;
+		}
 	}
 	else
-		*ret = read(fd, line_el->buf, BUFFER_SIZE);
+		*ret = read(fd->fd, line_el->buf, BUFFER_SIZE);
 	if (*ret == -1)
 		return (free(line_el), NULL);
+	line_el->buf[*ret] = '\0';
 	++*buf_count;
-	remove_line_from_buf(buf);
 	return (line_el);
 }
