@@ -6,7 +6,7 @@
 /*   By: snaji <snaji@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 21:34:43 by snaji             #+#    #+#             */
-/*   Updated: 2022/11/23 21:45:22 by snaji            ###   ########.fr       */
+/*   Updated: 2022/11/26 01:10:23 by snaji            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,28 +14,25 @@
 
 /* Returns the buffer corresponding to the fd in list_fd */
 /* or creates one and add it to the list */
-char	*get_fd_buf(int fd, t_fd **list_fd)
+t_fd	*get_fd(int fd, t_fd **list_fd)
 {
 	t_fd	*tmp;
-	int		i;
 
 	tmp = *list_fd;
 	while (tmp)
 	{
 		if (tmp->fd == fd)
-			return (tmp->buf);
+			return (tmp);
 		tmp = tmp->next;
 	}
 	tmp = malloc(sizeof (*tmp));
 	if (!tmp)
 		return (NULL);
-	i = 0;
-	while (i < BUFFER_SIZE + 1)
-		tmp->buf[i++] = '\0';
+	tmp->buf[0] = '\0';
 	tmp->fd = fd;
 	tmp->next = *list_fd;
 	*list_fd = tmp;
-	return (tmp->buf);
+	return (tmp);
 }
 
 /* Removes the corresponding fd from the list of fd */
@@ -69,31 +66,29 @@ void	remove_fd(int fd, t_fd **liste_fd)
 }
 
 /* Remove one line from the buffer */
-void	remove_line_from_buf(char *buffer)
+void	remove_line_from_buf(t_fd *fd)
 {
-	size_t		i;
-	size_t		j;
-	char		*tmp;
+	size_t	i;
+	size_t	j;
+	size_t	shift;	
 
-	tmp = malloc((BUFFER_SIZE + 1) * sizeof (*tmp));
-	if (tmp)
+	if (!*fd->buf)
+		return ;
+	shift = eol_pos(fd->buf);
+	i = 0;
+	if (!shift)
+		while (fd->buf[i])
+			fd->buf[i++] = '\0';
+	else
 	{
-		i = 0;
-		j = 0;
-		while (i < BUFFER_SIZE && buffer[i] != '\n')
-			++i;
-		++i;
-		while (i < BUFFER_SIZE)
-			tmp[j++] = buffer[i++];
-		while (j < BUFFER_SIZE)
-			tmp[j++] = '\0';
-		i = 0;
-		while (i < BUFFER_SIZE)
+		i = shift;
+		while (i--)
 		{
-			buffer[i] = tmp[i];
-			++i;
+			j = 0;
+			while (fd->buf[++j])
+				fd->buf[j - 1] = fd->buf[j];
+			fd->buf[j - 1] = fd->buf[j];
 		}
-		free(tmp);
 	}
 }
 
@@ -115,11 +110,18 @@ void	free_line(t_line **line)
 	*line = NULL;
 }
 
-/* Returns 1 if the buffer contains eol, returns 0 otherwise*/
-int	is_end_line(char *s)
+/* Returns the index + 1 of the first occurence of the eol character in s. */
+/* Returns 0 if s doesnt contain eol */
+size_t	eol_pos(char *s)
 {
-	while (s && *s)
-		if (*s++ == '\n')
-			return (1);
+	size_t	i;
+
+	i = 0;
+	while (s[i])
+	{
+		if (s[i] == '\n')
+			return (i + 1);
+		++i;
+	}
 	return (0);
 }

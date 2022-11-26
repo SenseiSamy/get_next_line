@@ -6,7 +6,7 @@
 /*   By: snaji <snaji@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 15:35:10 by snaji             #+#    #+#             */
-/*   Updated: 2022/11/25 19:52:46 by snaji            ###   ########.fr       */
+/*   Updated: 2022/11/26 01:05:31 by snaji            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,6 @@ typedef struct s_fd
 {
 	int			fd;
 	char		buf[BUFFER_SIZE + 1];
-	size_t		eol_pos;
 	struct s_fd	*next;
 }	t_fd;
 

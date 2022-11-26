@@ -6,7 +6,7 @@
 /*   By: snaji <snaji@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 16:26:16 by snaji             #+#    #+#             */
-/*   Updated: 2022/11/25 21:32:52 by snaji            ###   ########.fr       */
+/*   Updated: 2022/11/26 01:04:06 by snaji            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,12 +30,12 @@ t_fd	*get_fd(int fd, t_fd **list_fd)
 		return (NULL);
 	tmp->buf[0] = '\0';
 	tmp->fd = fd;
-	tmp->eol_pos = 0;
 	tmp->next = *list_fd;
 	*list_fd = tmp;
 	return (tmp);
 }
 
+/* Removes the corresponding fd from the list of fd */
 void	remove_fd(int fd, t_fd **liste_fd)
 {
 	t_fd	*tmp;
@@ -65,76 +65,32 @@ void	remove_fd(int fd, t_fd **liste_fd)
 	}
 }
 
-// /* Remove one line from the buffer */
-// void	remove_line_from_buf(char *buffer)
-// {
-// 	size_t		i;
-// 	size_t		j;
-// 	char		*tmp;
+/* Remove one line from the buffer */
+void	remove_line_from_buf(t_fd *fd)
+{
+	size_t	i;
+	size_t	j;
+	size_t	shift;	
 
-// 	tmp = malloc((BUFFER_SIZE + 1) * sizeof (*tmp));
-// 	if (tmp)
-// 	{
-// 		i = 0;
-// 		j = 0;
-// 		while (i < BUFFER_SIZE && buffer[i] != '\n')
-// 			++i;
-// 		++i;
-// 		while (i < BUFFER_SIZE)
-// 			tmp[j++] = buffer[i++];
-// 		while (j < BUFFER_SIZE)
-// 			tmp[j++] = '\0';
-// 		i = 0;
-// 		while (i < BUFFER_SIZE)
-// 		{
-// 			buffer[i] = tmp[i];
-// 			++i;
-// 		}
-// 		free(tmp);
-// 	}
-// }
-
-// /* Remove one line from the buffer */
-// void	remove_line_from_buf(char *buffer)
-// {
-// 	size_t	i;
-// 	size_t	j;
-// 	size_t	shift;	
-
-// 	if (!buffer || !*buffer)
-// 		return ;
-// 	shift = eol_pos(buffer);
-// 	i = 0;
-// 	if (!shift)
-// 		while (buffer[i])
-// 			buffer[i++] = '\0';
-// 	else
-// 	{
-// 		i = shift;
-// 		while (i--)
-// 		{
-// 			j = 0;
-// 			while (buffer[++j])
-// 				buffer[j - 1] = buffer[j];
-// 			buffer[j - 1] = buffer[j];
-// 		}
-// 	}
-// }
-
-// /* Remove one line from the buffer */
-// void	remove_line_from_buf(t_fd *fd)
-// {
-// 	size_t	shift;
-
-// 	if (!fd->buf || !*fd->buf)
-// 		return ;
-// 	shift = eol_pos(fd->buf + fd->eol_pos);
-// 	if (!shift)
-// 		while (fd->buf[shift])
-// 			fd->buf[shift++] = '\0';
-// 	else
-// 		fd->eol_pos += shift;
-// }
+	if (!*fd->buf)
+		return ;
+	shift = eol_pos(fd->buf);
+	i = 0;
+	if (!shift)
+		while (fd->buf[i])
+			fd->buf[i++] = '\0';
+	else
+	{
+		i = shift;
+		while (i--)
+		{
+			j = 0;
+			while (fd->buf[++j])
+				fd->buf[j - 1] = fd->buf[j];
+			fd->buf[j - 1] = fd->buf[j];
+		}
+	}
+}
 
 /* Frees the linked list line and set its pointer to NULL */
 void	free_line(t_line **line)

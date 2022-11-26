@@ -6,15 +6,11 @@
 /*   By: snaji <snaji@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 15:54:03 by snaji             #+#    #+#             */
-/*   Updated: 2022/11/25 21:30:02 by snaji            ###   ########.fr       */
+/*   Updated: 2022/11/26 01:13:51 by snaji            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
-
-//DEBUG
-#include <stdio.h>
-#include <time.h>
 
 char	*get_next_line(int fd)
 {
@@ -83,8 +79,7 @@ t_line	*get_line(t_fd *fd, int *buf_count)
 	i = 0;
 	while (curr->buf[++i - 1])
 		fd->buf[i - 1] = curr->buf[i - 1];
-	fd->eol_pos = 0;
-	//remove_line_from_buf(fd);
+	remove_line_from_buf(fd);
 	if (line->buf[0])
 		return (line);
 	return (free_line(&line), NULL);
@@ -99,14 +94,14 @@ t_line	*get_one(t_fd *fd, ssize_t *ret, int *buf_count)
 	if (!line_el)
 		return (NULL);
 	line_el->next = NULL;
-	if (fd->buf && eol_pos(fd->buf))
+	if (*fd->buf)
 	{
-		remove_line_from_buf(fd);
-		while (fd->buf[*ret + fd->eol_pos])
+		while (fd->buf[*ret])
 		{
-			line_el->buf[*ret] = fd->buf[*ret + fd->eol_pos];
+			line_el->buf[*ret] = fd->buf[*ret];
 			++*ret;
 		}
+		remove_line_from_buf(fd);
 	}
 	else
 		*ret = read(fd->fd, line_el->buf, BUFFER_SIZE);
