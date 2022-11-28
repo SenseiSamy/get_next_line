@@ -6,7 +6,7 @@
 /*   By: snaji <snaji@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 16:26:16 by snaji             #+#    #+#             */
-/*   Updated: 2022/11/26 01:04:06 by snaji            ###   ########.fr       */
+/*   Updated: 2022/11/28 19:04:58 by snaji            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 t_fd	*get_fd(int fd, t_fd **list_fd)
 {
 	t_fd	*tmp;
+	size_t	i;
 
 	tmp = *list_fd;
 	while (tmp)
@@ -28,7 +29,9 @@ t_fd	*get_fd(int fd, t_fd **list_fd)
 	tmp = malloc(sizeof (*tmp));
 	if (!tmp)
 		return (NULL);
-	tmp->buf[0] = '\0';
+	i = 0;
+	while (i < BUFFER_SIZE + 1)
+		tmp->buf[i++] = '\0';
 	tmp->fd = fd;
 	tmp->next = *list_fd;
 	*list_fd = tmp;
@@ -69,7 +72,6 @@ void	remove_fd(int fd, t_fd **liste_fd)
 void	remove_line_from_buf(t_fd *fd)
 {
 	size_t	i;
-	size_t	j;
 	size_t	shift;	
 
 	if (!*fd->buf)
@@ -81,14 +83,14 @@ void	remove_line_from_buf(t_fd *fd)
 			fd->buf[i++] = '\0';
 	else
 	{
-		i = shift;
-		while (i--)
+		while (fd->buf[shift + i])
 		{
-			j = 0;
-			while (fd->buf[++j])
-				fd->buf[j - 1] = fd->buf[j];
-			fd->buf[j - 1] = fd->buf[j];
+			fd->buf[i] = fd->buf[shift + i];
+			++i;
 		}
+		while (fd->buf[i])
+			fd->buf[i++] = '\0';
+		fd->buf[i] = '\0';
 	}
 }
 
